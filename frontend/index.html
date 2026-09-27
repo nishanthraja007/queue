@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PulseCare HAMS — Hospital Appointment Management System</title>
+  <meta name="description" content="Next-generation healthcare scheduling platform with real-time dynamic slot allocation and database-guaranteed concurrency safety." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background Glow Accents -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <div class="header-inner container">
+      <div class="brand-group" id="brand-logo" onclick="app.switchView('browse')">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PulseCare <span class="badge-text">HAMS</span></span>
+          <span class="brand-subtitle">Hospital Appointment System</span>
+        </div>
+      </div>
+
+      <!-- Live Connectivity Beacon -->
+      <div class="system-status-pill" id="system-status">
+        <span class="status-dot pulsing"></span>
+        <span class="status-label" id="status-text">Checking API...</span>
+      </div>
+
+      <!-- Main Navigation Tabs -->
+      <nav class="main-nav" id="main-nav">
+        <button class="nav-btn active" id="nav-browse" onclick="app.switchView('browse')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          Find Doctors
+        </button>
+        <button class="nav-btn" id="nav-appointments" onclick="app.switchView('appointments')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+          My Bookings
+          <span class="nav-count-badge" id="my-bookings-count" style="display:none;">0</span>
+        </button>
+        <button class="nav-btn" id="nav-queue" onclick="app.switchView('queue')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+          Doctor Queue
+        </button>
+        <button class="nav-btn" id="nav-admin" onclick="app.switchView('admin')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Admin Portal
+        </button>
+      </nav>
+
+      <!-- User & Quick Demo Bar -->
+      <div class="user-auth-actions" id="auth-actions">
+        <div class="user-profile-badge" id="user-badge" style="display: none;">
+          <div class="avatar-circle" id="user-avatar">U</div>
+          <div class="user-details">
+            <span class="user-name" id="user-display-name">User</span>
+            <span class="user-role-tag" id="user-display-role">PATIENT</span>
+          </div>
+          <button class="btn-icon" title="Logout" onclick="app.logout()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </button>
+        </div>
+
+        <button class="btn btn-primary btn-sm" id="btn-open-login" onclick="app.openAuthModal('login')">
+          Sign In
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Role Switcher Bar (Banner) -->
+    <div class="demo-role-banner">
+      <div class="container demo-role-inner">
+        <span class="demo-label">⚡ 1-Click Role Switch:</span>
+        <button class="demo-pill patient" onclick="app.quickLogin('patient')">
+          <span class="role-icon">👤</span> Demo Patient
+        </button>
+        <button class="demo-pill doctor" onclick="app.quickLogin('doctor')">
+          <span class="role-icon">🩺</span> Dr. Asha Rao (Doctor)
+        </button>
+        <button class="demo-pill admin" onclick="app.quickLogin('admin')">
+          <span class="role-icon">🛡️</span> System Admin
+        </button>
+        <span class="db-indicator">💾 SQLite Active (`hams.db`)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content View Area -->
+  <main class="main-content container">
+
+    <!-- VIEW 1: BROWSE DOCTORS & BOOK SLOTS -->
+    <section id="view-browse" class="view-section active">
+      <!-- Hero Banner -->
+      <div class="hero-card">
+        <div class="hero-content">
+          <div class="hero-chip">✨ High-Concurrency Healthcare Engine</div>
+          <h1 class="hero-title">Book Top Doctors, <span class="gradient-text">Zero Double-Booking</span></h1>
+          <p class="hero-desc">
+            Explore verified specialists, inspect real-time recurring slot availability, and experience race-proof appointments protected by database-level integrity constraints.
+          </p>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number" id="hero-doc-count">-</span>
+              <span class="stat-label">Specialists</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="hero-dept-count">-</span>
+              <span class="stat-label">Departments</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">100%</span>
+              <span class="stat-label">Conflict-Free</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Controls -->
+      <div class="search-filter-card">
+        <div class="search-input-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="filter-search" class="search-field" placeholder="Search doctor by name or specialization..." oninput="app.handleSearchInput()" />
+        </div>
+        <div class="department-pills" id="dept-pills">
+          <button class="dept-pill active" data-id="" onclick="app.filterByDept(null)">All Departments</button>
+          <!-- Dynamic Department Pills will load here -->
+        </div>
+      </div>
+
+      <!-- Doctor Directory Cards Grid -->
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Available Doctors</h2>
+          <p class="section-subtitle">Select a specialist below to preview available consulting hours and book a slot</p>
+        </div>
+      </div>
+
+      <div class="doctors-grid" id="doctors-list">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading medical specialists...</p>
+        </div>
+      </div>
+
+      <!-- Live Slot Booking Drawer / Section -->
+      <div id="slot-booking-card" class="slot-booking-card" style="display: none;">
+        <div class="slot-card-header">
+          <div class="selected-doctor-profile">
+            <div class="avatar-lg" id="selected-doc-avatar">DR</div>
+            <div>
+              <div class="badge-dept" id="selected-doc-dept">Cardiology</div>
+              <h3 class="selected-doc-name" id="selected-doc-name">Dr. Asha Rao</h3>
+              <p class="selected-doc-meta" id="selected-doc-meta">MD, DM Cardiology • ₹800 fee</p>
+            </div>
+          </div>
+          <button class="btn-close" onclick="app.closeSlotDrawer()">&times;</button>
+        </div>
+
+        <div class="slot-date-picker-bar">
+          <div class="date-selector-group">
+            <label for="slot-date-input" class="label-date">Select Appointment Date:</label>
+            <input type="date" id="slot-date-input" class="date-input" onchange="app.fetchSlotsForSelectedDoctor()" />
+          </div>
+          <div class="legend-group">
+            <span class="legend-item"><span class="slot-indicator available"></span> Available</span>
+            <span class="legend-item"><span class="slot-indicator booked"></span> Reserved</span>
+          </div>
+        </div>
+
+        <div class="slots-container">
+          <h4 class="slots-title">Available Consultation Slots (<span id="slots-weekday-label">Today</span>)</h4>
+          <div class="slots-grid" id="slots-grid">
+            <!-- Dynamic Slots will render here -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: PATIENT'S MY APPOINTMENTS -->
+    <section id="view-appointments" class="view-section">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">My Appointment History</h2>
+          <p class="view-subtitle">Review upcoming consultations, track status, or cancel pending bookings</p>
+        </div>
+        <button class="btn btn-outline" onclick="app.loadMyAppointments()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          Refresh
+        </button>
+      </div>
+
+      <div id="patient-auth-notice" class="auth-required-box" style="display: none;">
+        <div class="auth-notice-icon">🔒</div>
+        <h3>Patient Sign-In Required</h3>
+        <p>You need to be signed in as a patient to view your consultation history.</p>
+        <div class="auth-notice-actions">
+          <button class="btn btn-primary" onclick="app.quickLogin('patient')">Quick Patient Login</button>
+          <button class="btn btn-outline" onclick="app.openAuthModal('login')">Sign In with Credentials</button>
+        </div>
+      </div>
+
+      <div class="appointments-table-card" id="patient-appointments-wrapper">
+        <!-- LIVE PATIENT TOKEN MONITOR BANNER -->
+        <div class="patient-token-hero" id="patient-token-hero">
+          <div class="patient-token-box my-token-box">
+            <span class="p-token-badge-title">YOUR TOKEN NUMBER</span>
+            <span class="p-token-number" id="patient-my-token-num">TOKEN #—</span>
+            <span class="p-token-sub" id="patient-my-token-time">Slot: Select active booking</span>
+          </div>
+
+          <div class="patient-token-divider"></div>
+
+          <div class="patient-token-box now-consulting-box">
+            <span class="p-token-badge-title">NOW CONSULTING WITH DOCTOR</span>
+            <span class="p-token-number text-emerald" id="patient-now-token-num">TOKEN #—</span>
+            <span class="p-token-sub" id="patient-now-doctor-name">Dr. Asha Rao</span>
+          </div>
+
+          <div class="patient-token-divider"></div>
+
+          <div class="patient-token-box status-banner-box">
+            <span class="p-token-badge-title">LIVE QUEUE POSITION</span>
+            <span class="p-token-status-text text-amber" id="patient-queue-status-text">Checking status...</span>
+            <span class="p-token-sub" id="patient-queue-est-text">Please stand by at consultation room</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="patient-appts-table">
+            <thead>
+              <tr>
+                <th>Token #</th>
+                <th>ID</th>
+                <th>Doctor</th>
+                <th>Department</th>
+                <th>Date</th>
+                <th>Slot Time</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="patient-appts-body">
+              <tr>
+                <td colspan="9" class="text-center py-4 text-muted">No appointments found.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: DOCTOR'S DAILY QUEUE & AVAILABILITY -->
+    <section id="view-queue" class="view-section">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Doctor Consultation Queue</h2>
+          <p class="view-subtitle">Manage today's clinical patient stream and update appointment statuses</p>
+        </div>
+        <div class="header-actions">
+          <input type="date" id="queue-date-input" class="date-input" onchange="app.loadDoctorQueue()" />
+          <button class="btn btn-primary btn-sm" onclick="app.openAvailabilityModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Add Schedule Window
+          </button>
+        </div>
+      </div>
+
+      <div id="doctor-auth-notice" class="auth-required-box" style="display: none;">
+        <div class="auth-notice-icon">🩺</div>
+        <h3>Doctor Access Required</h3>
+        <p>This daily queue is restricted to verified healthcare providers.</p>
+        <div class="auth-notice-actions">
+          <button class="demo-pill doctor" onclick="app.quickLogin('doctor')">Sign in as Dr. Asha Rao</button>
+          <button class="btn btn-outline" onclick="app.openAuthModal('login')">Doctor Login</button>
+        </div>
+      </div>
+
+      <div class="queue-content-card" id="doctor-queue-wrapper">
+        <!-- LIVE DOCTOR TOKEN MONITOR BANNER -->
+        <div class="token-banner-grid" id="doctor-token-banner" style="margin: 20px 20px 0 20px;">
+          <div class="token-card active-consulting">
+            <div class="token-card-header">
+              <span class="token-card-dot live-pulse"></span>
+              <span class="token-card-label">NOW CONSULTING (PRESENT TOKEN)</span>
+            </div>
+            <div class="token-card-body">
+              <span class="token-number-lg text-emerald" id="doc-token-now-num">Token #—</span>
+              <div class="token-patient-info">
+                <span class="token-patient-name" id="doc-token-now-name">No active consultation</span>
+                <span class="token-patient-slot" id="doc-token-now-slot">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="token-card next-up">
+            <div class="token-card-header">
+              <span class="token-card-dot waiting-pulse"></span>
+              <span class="token-card-label">NEXT IN LINE</span>
+            </div>
+            <div class="token-card-body">
+              <span class="token-number-lg text-cyan" id="doc-token-next-num">Token #—</span>
+              <div class="token-patient-info">
+                <span class="token-patient-name" id="doc-token-next-name">No patient waiting</span>
+                <span class="token-patient-slot" id="doc-token-next-slot">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="token-card total-summary">
+            <div class="token-card-header">
+              <span class="token-card-label">TODAY'S TOTAL STREAM</span>
+            </div>
+            <div class="token-card-body">
+              <span class="token-number-lg text-amber" id="doc-token-total-num">0</span>
+              <div class="token-patient-info">
+                <span class="token-patient-name">Total Tokens Issued</span>
+                <span class="token-patient-slot" id="doc-token-stats-sub">0 Waiting • 0 Completed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="queue-summary-bar">
+          <div class="queue-stat">
+            <span class="q-label">Total Patients:</span>
+            <span class="q-val" id="queue-count-total">0</span>
+          </div>
+          <div class="queue-stat">
+            <span class="q-label">Waiting / Booked:</span>
+            <span class="q-val text-cyan" id="queue-count-booked">0</span>
+          </div>
+          <div class="queue-stat">
+            <span class="q-label">In-Progress:</span>
+            <span class="q-val text-amber" id="queue-count-inprogress">0</span>
+          </div>
+          <div class="queue-stat">
+            <span class="q-label">Completed:</span>
+            <span class="q-val text-emerald" id="queue-count-completed">0</span>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table" id="doctor-queue-table">
+            <thead>
+              <tr>
+                <th>Token #</th>
+                <th>Slot</th>
+                <th>Patient Name</th>
+                <th>Contact</th>
+                <th>Reason</th>
+                <th>Current Status</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody id="doctor-queue-body">
+              <tr>
+                <td colspan="6" class="text-center py-4 text-muted">No appointments scheduled for this date.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: ADMIN OPERATIONS & METRICS -->
+    <section id="view-admin" class="view-section">
+      <div class="view-header">
+        <div>
+          <h2 class="view-title">Hospital Operations & Management</h2>
+          <p class="view-subtitle">Executive overview of hospital throughput, department setup, and doctor onboarding</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-outline btn-sm" onclick="app.openAddDeptModal()">+ Add Department</button>
+          <button class="btn btn-primary btn-sm" onclick="app.openAddDoctorModal()">+ Onboard Doctor</button>
+        </div>
+      </div>
+
+      <div id="admin-auth-notice" class="auth-required-box" style="display: none;">
+        <div class="auth-notice-icon">🛡️</div>
+        <h3>Admin Credentials Required</h3>
+        <p>You must be signed in with administrative privileges to view operational metrics and manage staff.</p>
+        <div class="auth-notice-actions">
+          <button class="demo-pill admin" onclick="app.quickLogin('admin')">Login as System Admin</button>
+          <button class="btn btn-outline" onclick="app.openAuthModal('login')">Admin Login</button>
+        </div>
+      </div>
+
+      <div id="admin-dashboard-wrapper">
+        <!-- KPI Metrics Grid -->
+        <div class="admin-kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-title">Total Appointments</div>
+            <div class="kpi-value" id="kpi-total-appts">0</div>
+            <div class="kpi-sub">Lifetime bookings recorded</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Today's Consultations</div>
+            <div class="kpi-value text-cyan" id="kpi-today-appts">0</div>
+            <div class="kpi-sub">Scheduled for today</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Active Doctors</div>
+            <div class="kpi-value text-emerald" id="kpi-total-docs">0</div>
+            <div class="kpi-sub">Staff registered</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Registered Patients</div>
+            <div class="kpi-value text-purple" id="kpi-total-patients">0</div>
+            <div class="kpi-sub">Total user accounts</div>
+          </div>
+        </div>
+
+        <!-- Status Breakdown Progress -->
+        <div class="status-distribution-card">
+          <h3 class="card-heading">Appointment Status Distribution</h3>
+          <div class="distribution-bars" id="admin-status-bars">
+            <!-- Dynamic Status Progress Bars -->
+          </div>
+        </div>
+
+        <!-- Master Appointments Stream -->
+        <div class="section-header mt-4">
+          <div>
+            <h3 class="section-title">Master Appointment Stream</h3>
+            <p class="section-subtitle">Real-time log of all hospital bookings with integrity checks</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="app.loadAdminData()">Refresh Stream</button>
+        </div>
+
+        <div class="appointments-table-card">
+          <div class="table-responsive">
+            <table class="data-table" id="admin-appts-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Patient</th>
+                  <th>Doctor</th>
+                  <th>Department</th>
+                  <th>Date</th>
+                  <th>Slot Time</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-appts-body">
+                <tr>
+                  <td colspan="8" class="text-center py-4 text-muted">Loading appointments...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: BOOK APPOINTMENT CONFIRMATION -->
+  <div class="modal-backdrop" id="modal-booking">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Confirm Consultation Booking</h3>
+        <button class="btn-close" onclick="app.closeModal('modal-booking')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="booking-summary-box">
+          <div class="summary-row">
+            <span class="s-label">Doctor:</span>
+            <span class="s-val font-bold" id="modal-book-doc-name">Dr. Asha Rao</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Department:</span>
+            <span class="s-val" id="modal-book-doc-dept">Cardiology</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Date:</span>
+            <span class="s-val" id="modal-book-date">2026-09-26</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Time Slot:</span>
+            <span class="s-val text-cyan font-bold" id="modal-book-slot">09:00:00</span>
+          </div>
+          <div class="summary-row">
+            <span class="s-label">Consultation Fee:</span>
+            <span class="s-val text-emerald font-bold" id="modal-book-fee">₹800</span>
+          </div>
+        </div>
+
+        <div class="form-group mt-3">
+          <label for="book-reason-input" class="form-label">Reason for Consultation (Optional):</label>
+          <input type="text" id="book-reason-input" class="form-input" placeholder="e.g. Routine checkup, ECG review, chest discomfort..." />
+        </div>
+
+        <div class="info-alert">
+          🔒 <strong>Concurrency Protected:</strong> This slot is locked using transactional integrity with a database unique index guard.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="app.closeModal('modal-booking')">Cancel</button>
+        <button class="btn btn-primary" id="btn-confirm-booking" onclick="app.submitBooking()">Confirm & Book Slot</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: AUTHENTICATION (LOGIN / REGISTER) -->
+  <div class="modal-backdrop" id="modal-auth">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" onclick="app.switchAuthTab('login')">Sign In</button>
+          <button class="auth-tab" id="tab-register" onclick="app.switchAuthTab('register')">Register Patient</button>
+        </div>
+        <button class="btn-close" onclick="app.closeModal('modal-auth')">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Form: Login -->
+        <form id="form-login" onsubmit="app.handleLoginSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="login-email" class="form-input" placeholder="name@hams.local" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-login-submit">Sign In to HAMS</button>
+
+          <div class="demo-creds-box mt-3">
+            <span class="demo-creds-title">Demo Credentials:</span>
+            <div class="demo-cred-line"><strong>Admin:</strong> admin@hams.local / Admin@123</div>
+            <div class="demo-cred-line"><strong>Doctor:</strong> asha.rao@hams.local / Doctor@123</div>
+          </div>
+        </form>
+
+        <!-- Form: Register -->
+        <form id="form-register" style="display: none;" onsubmit="app.handleRegisterSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" id="reg-name" class="form-input" placeholder="e.g. John Doe" required minlength="2" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" id="reg-email" class="form-input" placeholder="john@example.com" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" id="reg-phone" class="form-input" placeholder="9876543210" required minlength="7" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" id="reg-password" class="form-input" placeholder="Minimum 6 characters" required minlength="6" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Date of Birth</label>
+              <input type="date" id="reg-dob" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select id="reg-gender" class="form-input">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block mt-3" id="btn-reg-submit">Create Patient Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ONBOARD NEW DOCTOR (ADMIN) -->
+  <div class="modal-backdrop" id="modal-add-doctor">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Onboard New Medical Doctor</h3>
+        <button class="btn-close" onclick="app.closeModal('modal-add-doctor')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-doctor" onsubmit="app.submitNewDoctor(event)">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Doctor Full Name</label>
+              <input type="text" id="doc-new-name" class="form-input" placeholder="e.g. Dr. Rajesh Kumar" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Department</label>
+              <select id="doc-new-dept" class="form-input" required>
+                <!-- Dynamic Depts -->
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input type="email" id="doc-new-email" class="form-input" placeholder="rajesh@hams.local" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" id="doc-new-phone" class="form-input" placeholder="9000000002" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Temporary Password</label>
+            <input type="password" id="doc-new-password" class="form-input" value="Doctor@123" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Specialization</label>
+              <input type="text" id="doc-new-spec" class="form-input" placeholder="e.g. Clinical Dermatology" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Qualifications</label>
+              <input type="text" id="doc-new-qual" class="form-input" placeholder="e.g. MBBS, MD" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Experience (Years)</label>
+              <input type="number" id="doc-new-exp" class="form-input" value="8" min="0" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Consultation Fee (₹)</label>
+              <input type="number" id="doc-new-fee" class="form-input" value="600" min="0" />
+            </div>
+          </div>
+          <div class="modal-footer px-0 pb-0 mt-3">
+            <button type="button" class="btn btn-outline" onclick="app.closeModal('modal-add-doctor')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Doctor Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD DEPARTMENT (ADMIN) -->
+  <div class="modal-backdrop" id="modal-add-dept">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Create Department</h3>
+        <button class="btn-close" onclick="app.closeModal('modal-add-dept')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-dept" onsubmit="app.submitNewDept(event)">
+          <div class="form-group">
+            <label class="form-label">Department Name</label>
+            <input type="text" id="dept-new-name" class="form-input" placeholder="e.g. Neurology, Pediatrics" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="dept-new-desc" class="form-input" rows="3" placeholder="Brief overview of clinical scope..."></textarea>
+          </div>
+          <div class="modal-footer px-0 pb-0 mt-3">
+            <button type="button" class="btn btn-outline" onclick="app.closeModal('modal-add-dept')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Create Department</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DOCTOR ADD AVAILABILITY WINDOW -->
+  <div class="modal-backdrop" id="modal-add-avail">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title">Configure Recurring Availability</h3>
+        <button class="btn-close" onclick="app.closeModal('modal-add-avail')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-add-avail" onsubmit="app.submitDoctorAvailability(event)">
+          <div class="form-group">
+            <label class="form-label">Day of Week</label>
+            <select id="avail-day" class="form-input">
+              <option value="0">Monday</option>
+              <option value="1">Tuesday</option>
+              <option value="2">Wednesday</option>
+              <option value="3">Thursday</option>
+              <option value="4">Friday</option>
+              <option value="5">Saturday</option>
+              <option value="6">Sunday</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Start Time</label>
+              <input type="time" id="avail-start" class="form-input" value="09:00" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Time</label>
+              <input type="time" id="avail-end" class="form-input" value="13:00" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Slot Duration (Minutes)</label>
+            <select id="avail-duration" class="form-input">
+              <option value="15">15 Minutes</option>
+              <option value="20" selected>20 Minutes</option>
+              <option value="30">30 Minutes</option>
+              <option value="45">45 Minutes</option>
+            </select>
+          </div>
+          <div class="modal-footer px-0 pb-0 mt-3">
+            <button type="button" class="btn btn-outline" onclick="app.closeModal('modal-add-avail')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Schedule Window</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>

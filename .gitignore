@@ -1,0 +1,37 @@
+# Virtual environments
+venv/
+.venv/
+env/
+que/backend/venv/
+
+# Node.js dependencies
+node_modules/
+frontend/node_modules/
+
+# Python cache & build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# SQLite databases & runtime data
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.local
+
+# Large media / recording files (>100MB GitHub limit)
+*.mp4
+*.avi
+*.mov
+*.mkv
+
+# OS & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

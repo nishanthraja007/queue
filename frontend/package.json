@@ -1,0 +1,12 @@
+{
+  "name": "hams-frontend",
+  "version": "1.0.0",
+  "description": "Hospital Appointment Management System (HAMS) Frontend",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["hospital", "appointments", "fastapi", "hams"],
+  "author": "",
+  "license": "ISC"
+}
